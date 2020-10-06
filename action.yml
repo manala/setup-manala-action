@@ -1,0 +1,24 @@
+name: Setup Manala
+description: Setup the Manala binary adn add it to the PATH
+author: 'Manala'
+branding:
+  color: orange
+  icon: settings
+
+#inputs:
+#  version:
+#    description: 'The Manala binary version'
+#    required: false
+#    default: ~
+
+runs:
+  using: composite
+  steps:
+
+    - name: Download & Install the Manala binary
+      shell: bash
+      run: curl -sfL https://raw.githubusercontent.com/manala/manala/master/godownloader.sh | sh
+
+    - name: Add to PATH
+      shell: bash
+      run: echo "./bin/" >> $GITHUB_PATH
