@@ -38,7 +38,7 @@ runs:
             if git diff-index --quiet HEAD --; then
               echo "No changes detected"
             else
-              echo "::warning file=.manala.yaml,line=1,col=0::Manala detected some changes that are not reflected in your commit. Inspect those changes in the logs or run `manala up` and commit these changes on your branch."
+              echo "::warning file=.manala.yaml,line=1,col=0::Manala detected some changes that are not reflected in your commit. Inspect those changes in the logs or run \`manala up\` and commit these changes on your branch."
               git diff HEAD --color=always
               status=1
             fi
