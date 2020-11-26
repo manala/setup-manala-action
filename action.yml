@@ -1,24 +1,48 @@
 name: Setup Manala
-description: Setup the Manala binary adn add it to the PATH
+description: Setup the Manala binary and run extra checks
 author: 'Manala'
 branding:
   color: orange
   icon: settings
 
-#inputs:
-#  version:
-#    description: 'The Manala binary version'
-#    required: false
-#    default: ~
+inputs:
+  checks:
+    description: 'Checks to run. Must be a JSON array. Available checks: ["update"]'
+    required: false
+    default: '[]'
 
 runs:
   using: composite
   steps:
 
-    - name: Download & Install the Manala binary
+    - name: Setup
       shell: bash
-      run: curl -sfL https://raw.githubusercontent.com/manala/manala/master/godownloader.sh | sh
+      run: |
+        if ! command -v manala &> /dev/null; then
+          echo "::group::Download & Install the Manala binary"
+            curl -sfL https://raw.githubusercontent.com/manala/manala/master/godownloader.sh | sh
+            echo "./bin/" >> $GITHUB_PATH
+          echo "::endgroup::"
+        fi
 
-    - name: Add to PATH
+    - name: Checks
       shell: bash
-      run: echo "./bin/" >> $GITHUB_PATH
+      run: |
+        status=0
+
+        if [ true = ${{ contains(fromJSON(inputs.checks), 'update') }} ]; then
+          echo "::group::Running \"update\" check"
+            manala update
+            git add --all .manala/
+
+            if git diff-index --quiet HEAD --; then
+              echo "No changes detected"
+            else
+              echo "::warning file=.manala.yaml,line=1,col=0::Manala detected some changes that are not reflected in your commit. Inspect those changes in the logs or run `manala up` and commit these changes on your branch."
+              git diff HEAD --color=always
+              status=1
+            fi
+          echo "::endgroup::"
+        fi
+
+        exit $status
